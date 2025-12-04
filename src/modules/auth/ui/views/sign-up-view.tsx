@@ -2,9 +2,10 @@
 
 import { z } from "zod";
 import { OctagonAlertIcon } from "lucide-react";
+import { FaGoogle, FaGithub } from "react-icons/fa";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -51,11 +52,40 @@ export const SignUpView = () => {
                 name: data.name,
                 email: data.email,
                 password: data.password,
+                callbackURL: "/",
             },
             {
                 onSuccess: () => {
                     setPending(false);
                     router.push("/");
+                },
+                onError: () => {
+                    // 🔥 esto es lo que te faltaba para que no quede cargando
+                    setPending(false);
+
+                    // ✅ el mensaje EXACTO que querés mostrar en el Alert de la foto
+                    setError("Invalid email or password");
+
+                    // (opcional) para ver qué llega realmente:
+                    // console.log("SIGN IN ERROR:", ctx);
+                },
+            }
+        );
+    };
+
+    const onSocial = (provider: "google" | "github") => {
+        setError(null);
+        setPending(true);
+
+
+        authClient.signIn.social(
+            {
+                provider: provider,
+                callbackURL: "/",
+            },
+            {
+                onSuccess: () => {
+                    setPending(false);
                 },
                 onError: () => {
                     // 🔥 esto es lo que te faltaba para que no quede cargando
@@ -186,11 +216,19 @@ export const SignUpView = () => {
                                     </span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Button disabled={pending} variant="outline" className="w-full" type="button">
-                                        Google
+                                    <Button disabled={pending}
+                                    onClick={() => onSocial("google")} 
+                                    variant="outline" 
+                                    className="w-full" 
+                                    type="button">
+                                        <FaGoogle />
                                     </Button>
-                                    <Button disabled={pending} variant="outline" className="w-full">
-                                        Github
+                                    <Button disabled={pending}
+                                    onClick={() => onSocial("github")}
+                                     variant="outline"
+                                      className="w-full"
+                                      type="button">
+                                        <FaGithub />
                                     </Button>
                                 </div>
                                 <div className="text-center text-sm">
